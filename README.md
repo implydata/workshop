@@ -252,7 +252,8 @@ from clickstream_new_session_flag
 * Start by creating the target table in Polaris
  * Navigate to Tables in the left panel.
  * Click `Create table` button at the top right.
- * Name the table `workshop_clickstream` or whatever you want and select Schema Mode: `Felxible` with Table type `Detail`
+ * Name the table `workshop_clickstream` or whatever you want and select Schema Mode: `Felxible` with Table type `Detail` and click `Create`:
+
  ![](assets/polaris_create_table.png)
 
 
@@ -267,6 +268,8 @@ from clickstream_new_session_flag
 
 * Click Next, and select the Input format as JSON and click `Continue`.
 * In the next screen, we'll need to map the __time column, the rest will be automatically detected because it is a "Flexible" table.
+![](assets/clickstream_push_map_time.png)
+* Finally click `Start Ingestion`.
 
 ##### OAuth Client
 We will also need an OAuth client to secure the push endpoint:
