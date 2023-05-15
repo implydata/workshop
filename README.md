@@ -285,7 +285,6 @@ We will also need an OAuth client to secure the push endpoint:
 ![](assets/workshop_oauth_permissions.png)
 * Click on the `Credentials` tab and copy the secret.
 
-secret: g0UERJ3zm9xPxvaaKTOa2LnkijpIXuNq
 
 ##### Back in Decodable, setup the Polaris Sink:
  * From the `clickstream_sessionized` stream overview page, click on the output menu and select `Create sink connection`
