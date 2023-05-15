@@ -5,11 +5,13 @@ Polaris is a SaaS solution powered by Apache Druid and Imply Pivot. Apache Druid
 
 * Create an Polaris account at https://imply.io/ click on `Start Free Trial` button.
 * Then follow the instructions you'll get by email to logon to your Polaris environment.
+* When prompted select `us-east-1` for the region.
 
 #### Setup Your Decodable Account
 Decodable is a stream transformation engine that is powered by Debezium and Flink to deliver end to end stream processing using SQL. We will use it during the workshop to ingest real-time data, enhance it and transform it in preparation for doing real-time analytics with Apache Druid.
 You will need to have a decodable account to consume from the streaming data we will provide.
 * Create an account at https://decodable.co using the "Start Free" button and take note of your `account name`.
+* When prompted select `us-east-1` for the region.
 * Download the [Decodable CLI](https://docs.decodable.co/docs/command-line-interface)
 * Open a terminal window which we will be using throughout the workshop.
 * Setup the Account in the Command Line:
@@ -135,7 +137,7 @@ decodable connection create \
 ```
 
 This will create the stream `clickstream_source`, find it in the Streams tab and edit it:
-- Add `user_id` into the partitioning key
+- Select `user_id` and set it as the partitioning key
 ![](assets/clickstream_source_partitioning_key.png)
 
 - Click on the `+Add Field` button at the bottom to add computed field for `proc_time` and `click_timestamp`:
@@ -214,11 +216,12 @@ from clickstream_enhanced
 ```
 * The created stream `clickstream_new_session_flag` will also need `_time` as the watermark and `user_id` as the partition key. Make those changes to the stream and then start the pipeline.
 * If you look at the preview of the `clickstream_new_session_flag` you can see some `new_session_flag` values set to `True`.
+* Click Next to create the target stream and save the pipeline as `clickstream_add_new_session_flag`.
 
 ##### Adding a Session ID to the clickstream
 The second step is to calculate the session_id based on the user_id, client_ip and the timestamp for the most recent event that marks the start of the session.  We use another window function to find the timestamp of most recent new session event:
 
-* Start by testing creating a new pipeline and testing that the new_session_flag is working running the following SQL in preview mode:
+* Start by creating a new pipeline and testing that the new_session_flag is working running the following SQL in preview mode:
 ```
 insert into clickstream_sessionized
 select *
@@ -230,7 +233,7 @@ The generated data only has user_id < 40 so any number under 40 should show resu
 * Now replace SQL to generate the session_id:
 ```
 insert into clickstream_sessionized
-select __time, event_type, user_id, client_ip, client_device, client_lang, client_country,referrer, keyword, product, proc_time,
+select __time, event_type, user_id, client_ip, client_device, client_lang, client_country,referrer, keyword, product,
      CAST(user_id AS VARCHAR) || '_' || client_ip || '_' ||
        DATE_FORMAT(
            MAX( CASE WHEN new_session_flag THEN __time ELSE NULL END) OVER (PARTITION BY user_id, client_ip ORDER BY __time),
@@ -238,7 +241,7 @@ select __time, event_type, user_id, client_ip, client_device, client_lang, clien
            )
        AS session_id,
         user_age, address_lat, address_long, marital_status, income, signup_ts
-from clicks_new_session_flag
+from clickstream_new_session_flag
 ```
 * click Next to save the new stream `clickstream_sessionized` and pipeline as `clickstream_add_session_id`
 * Start the Pipeline
