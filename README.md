@@ -288,7 +288,7 @@ We will also need an OAuth client to secure the push endpoint:
 
 ##### Back in Decodable, setup the Polaris Sink:
  * From the `clickstream_sessionized` stream overview page, click on the output menu and select `Create sink connection`
- * Select `Imply Polaris Sink` can click on `Connect`
+ * Select `Imply Polaris Sink` and click on `Connect`
  * Fill in the connection information as follows (use the secret you copied from Polaris in the Client Secret field):
  ![](assets/clickstream_polaris_sink.png)
  * Click `Next`, select stream `clickstream_sessionized`, and click `Next`
@@ -303,3 +303,46 @@ We will also need an OAuth client to secure the push endpoint:
 
 
 # Polaris Visualization
+
+### SQL view
+You can inspect the data using SQL:
+![](assets/polaris_sql.png)
+Here's the sample SQL, test it out yourself:
+```
+SELECT "session_id",
+       ST_GEOHASH( "address_lat", "address_long", 8) as geo_location,
+       EARLIEST_BY( "referrer", __time, 30) referrer,
+       LATEST_BY("user_age", __time, 30) age,
+       LATEST_BY("marital_status", __time, 30) marital_status,
+       LATEST_BY("income", __time, 30) income,
+       min(__time) as session_start,
+       max(__time) as session_end,
+       EARLIEST_BY("event_type", __time, 30) as First_Event,
+       LATEST_BY("event_type", __time, 30) as Last_Event,
+       TIMESTAMPDIFF(SECOND, min(__time), max(__time)) "session_duration"
+FROM "workshop_clickstream"
+GROUP BY 1,2
+```
+- ST_GEOHASH is used to convert latitude and longitude into a hash that can be used in map visualizations.
+- EARLIEST_BY/LATEST_BY is an aggregate function that returns earliest or latest value the expression within the aggregate group.
+  Notice that it is used in different ways, to get the user's profile columns as they were at the end of the session, or to find the first event_type in the session and the last event_type in the session.
+
+### Create a Data Cube and Navigate the Data
+A data cube can be created from a whole table or from a SQL statement:
+![](assets/polaris_create_data_cube.png)
+
+You can also add dimensions and metrics to the data cube.
+Add a custom dimension expressions like `ST_GEOHASH("address_lat", "address_long", 8)`:
+#### Step 1
+![](assets/polaris_data_cube_new_dimension.png)
+#### Step 2
+![](assets/polaris_add_dimension_geo_hash.png)
+#### Step 3
+Drag the a dimension into the main display area, or into the "Show" area for multi-dimensional visualizations, as in this example with a Sunburst Chart:
+![](assets/polaris_drag_dimension.png)
+
+Now try different visualizations with different dimensions and metrics.
+
+#### Step 4
+Once you are happy with a visualization, add it to a dashboard or start a new dashboard with it:
+![](assets/polaris_add_to_dashboard.png)
